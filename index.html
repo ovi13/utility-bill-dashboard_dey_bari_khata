@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dey Bari — Utility Khata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-mark">🧾</div>
+    <h1>Dey Bari Utility Khata</h1>
+    <p class="login-sub">Household utility bill ledger — enter your PIN to continue</p>
+    <input type="text" id="loginAccountantInput" style="width:100%; border:1px solid var(--line); border-radius:10px; background:#fff; padding:12px 14px; font-size:1.05rem; color:var(--ink); margin-bottom:16px; text-align:left;">
+    <div class="pin-dots" id="pinDots">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div id="pinError" class="pin-error"></div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="clear" class="ghost">Clear</button><button data-k="0">0</button><button data-k="back" class="ghost">⌫</button>
+    </div>
+    <button id="firstRunBtn" class="text-link" style="display:none;">First time here? Set up your PIN</button>
+  </div>
+</div>
+
+<!-- ===================== FIRST RUN / SET PIN ===================== -->
+<div id="setupScreen" class="login-screen" style="display:none;">
+  <div class="login-card">
+    <div class="login-mark">🧾</div>
+    <h1>Set up your ledger PIN</h1>
+    <p class="login-sub">Choose a 4-digit PIN. This unlocks the site on this device.</p>
+    <input type="text" id="setupAccountantInput" style="width:100%; border:1px solid var(--line); border-radius:10px; background:#fff; padding:12px 14px; font-size:1.05rem; color:var(--ink); margin-bottom:10px; text-align:left;" placeholder="Accountant name">
+    <input type="password" id="setupPinInput" maxlength="4" inputmode="numeric" class="pin-text-input" placeholder="••••">
+    <input type="password" id="setupPinConfirm" maxlength="4" inputmode="numeric" class="pin-text-input" placeholder="Confirm PIN">
+    <div id="setupError" class="pin-error"></div>
+    <button id="setupSaveBtn" class="btn-primary" style="width:100%;margin-top:10px;">Save PIN &amp; Continue</button>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app" class="app-shell" style="display:none;">
+
+  <aside class="sidebar no-print">
+    <div class="brand">
+      <span class="brand-mark">🧾</span>
+      <div>
+        <div class="brand-title">Dey Bari</div>
+        <div class="brand-sub">Utility Khata</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard"><span class="nav-ic">01</span>Dashboard</button>
+      <button class="nav-item" data-view="entry"><span class="nav-ic">02</span>Monthly Entry</button>
+      <button class="nav-item" data-view="history"><span class="nav-ic">03</span>Bill History</button>
+      <button class="nav-item" data-view="users"><span class="nav-ic">04</span>Household Members</button>
+      <button class="nav-item" data-view="print"><span class="nav-ic">05</span>Print Invoices</button>
+      <button class="nav-item" data-view="settings"><span class="nav-ic">06</span>Settings</button>
+    </nav>
+    <button id="lockBtn" class="lock-btn">Lock ledger 🔒</button>
+  </aside>
+
+  <main class="content">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="view-dashboard" class="view">
+      <header class="view-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="muted" id="dashMonthLabel">Overview</p>
+        </div>
+        <select id="dashMonthSelect" class="select"></select>
+      </header>
+
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="cash-accounts-box" id="cashAccountsBox"></div>
+
+      <div class="panel-grid single-panel-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Member bills this month</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="ledger-table" id="dashUserTable"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MONTHLY ENTRY ============ -->
+    <section id="view-entry" class="view" style="display:none;">
+      <header class="view-header">
+        <div>
+          <h1>Monthly Entry</h1>
+          <p class="muted">Enter this month's variable readings — fixed charges are applied automatically</p>
+        </div>
+        <input type="month" id="entryMonth" class="select">
+      </header>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Per-user Billing Calculator</h2>
+          <span class="tag">Calculate each member's bill before payment</span>
+        </div>
+        <div class="motor-row">
+          <label>Shared motor bill total (৳)</label>
+          <input type="number" id="sharedMotorTotalInput" min="0" step="1" placeholder="0">
+          <span class="muted" id="sharedMotorSplitHint"></span>
+        </div>
+        <div id="userBillCalculator"></div>
+        <div class="entry-actions" style="margin-top:12px; justify-content:flex-start;">
+          <button id="applyCalculatorBtn" class="btn-secondary">Apply to monthly entries</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Shared Motor (Water) Bill</h2>
+          <span class="tag">Split equally between motor-share members</span>
+        </div>
+        <div class="motor-row">
+          <label>Total Motor Bill for the month (৳)</label>
+          <input type="number" id="motorTotalInput" min="0" step="1" placeholder="0">
+          <span class="muted" id="motorShareHint"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Per-member figures</h2></div>
+        <div class="table-wrap">
+          <table class="ledger-table" id="entryTable"></table>
+        </div>
+      </div>
+
+      <div class="entry-actions">
+        <button id="entrySaveBtn" class="btn-primary">Save this month's bills</button>
+        <span id="entrySavedNote" class="muted"></span>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY ============ -->
+    <section id="view-history" class="view" style="display:none;">
+      <header class="view-header">
+        <div>
+          <h1>Bill History</h1>
+          <p class="muted">Every saved month, across all members</p>
+        </div>
+        <div class="settings-row" style="gap:10px;">
+          <select id="historyUserFilter" class="select"></select>
+          <select id="historyMonthFilter" class="select"></select>
+          <button id="clearHistoryBtn" class="btn-secondary">Clear Selected Month</button>
+          <button id="clearAllHistoryBtn" class="btn-secondary">Clear All History</button>
+        </div>
+      </header>
+      <div class="panel">
+        <div class="table-wrap">
+          <table class="ledger-table" id="historyTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOUSEHOLD MEMBERS ============ -->
+    <section id="view-users" class="view" style="display:none;">
+      <header class="view-header">
+        <div>
+          <h1>Household Members</h1>
+          <p class="muted">Fixed account details and yearly analysis for each member</p>
+        </div>
+      </header>
+      <div class="member-cards" id="memberCards"></div>
+
+      <div class="panel" id="memberDetailPanel" style="display:none;">
+        <div class="panel-head">
+          <h2 id="memberDetailName">Member</h2>
+          <select id="memberDetailYear" class="select"></select>
+        </div>
+        <div class="stat-grid" id="memberYearStats"></div>
+        <canvas id="memberChart" height="520"></canvas>
+        <div class="table-wrap">
+          <table class="ledger-table" id="memberYearTable"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRINT INVOICES ============ -->
+    <section id="view-print" class="view" style="display:none;">
+      <header class="view-header">
+        <div>
+          <h1>Print Invoices</h1>
+          <p class="muted">Generate an A4 invoice for one member, or all members at once</p>
+        </div>
+      </header>
+
+      <div class="panel">
+        <div class="print-controls">
+          <div class="field">
+            <label>Billing month</label>
+            <select id="printMonthSelect" class="select"></select>
+          </div>
+          <div class="field">
+            <label>Member</label>
+            <select id="printUserSelect" class="select">
+              <option value="__all__">All members (multi-page)</option>
+            </select>
+          </div>
+          <button id="printGoBtn" class="btn-primary">Preview &amp; Print</button>
+        </div>
+      </div>
+
+      <div id="invoicePreviewWrap"></div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section id="view-settings" class="view" style="display:none;">
+      <header class="view-header">
+        <div>
+          <h1>Settings</h1>
+          <p class="muted">Fixed charges, PIN, and backup</p>
+        </div>
+      </header>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Fixed Gas Charges (per member, per month)</h2></div>
+        <div class="table-wrap">
+          <table class="ledger-table" id="settingsGasTable"></table>
+        </div>
+        <button id="saveGasFixedBtn" class="btn-secondary">Save fixed charges</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Household member names</h2></div>
+        <div class="table-wrap">
+          <table class="ledger-table" id="settingsMemberTable"></table>
+        </div>
+        <button id="saveMemberNamesBtn" class="btn-secondary">Save member names</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Ledger PIN</h2></div>
+        <div class="settings-row">
+          <input type="password" id="newPinInput" maxlength="4" inputmode="numeric" class="pin-text-input" placeholder="New 4-digit PIN">
+          <button id="changePinBtn" class="btn-secondary">Update PIN</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Admin / Accountant Name(s)</h2></div>
+        <div class="settings-row">
+          <input type="text" id="adminNamesInput" class="pin-text-input" placeholder="Prothom Dey Ovi, Md. Rahman">
+          <button id="saveAdminNamesBtn" class="btn-secondary">Save names</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Backup &amp; Restore</h2></div>
+        <p class="muted">Everything is stored in this browser only. Export a backup regularly.</p>
+        <div class="settings-row">
+          <button id="exportBtn" class="btn-secondary">Export backup (.json)</button>
+          <label class="btn-secondary file-btn">Import backup
+            <input type="file" id="importInput" accept="application/json" style="display:none;">
+          </label>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="site-credit no-print">
+  <span>Dashboard is Created by Prothom Dey Ovi</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
