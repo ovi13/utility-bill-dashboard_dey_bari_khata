@@ -252,6 +252,13 @@ function gasBalanceDisplay(balance){
   return `Return ${fmt(balance)}`;
 }
 
+function gasBkashChargeForUser(userId, bkashValue){
+  const value = Number(bkashValue || 0);
+  if(userId === 'mridul') return 10;
+  if(userId === 'mamoni' || userId === 'boumoni') return 0;
+  return value;
+}
+
 // =======================================================================
 // LOGIN / PIN
 // =======================================================================
@@ -451,7 +458,7 @@ function renderDashChart(){
   dashChartInstance = new Chart(ctx, {
     type:'bar',
     data:{
-      labels: months.map(m=>monthLabel(m).replace(' ',' \'').replace('20','')),
+      labels: months.map(m=>monthLabel(m).replace(' ', " '").replace('20','')),
       datasets:[
         {label:'Total Bill', data:bills, backgroundColor:'#A6521D'},
         {label:'Cash Collected', data:cashCollected, backgroundColor:'#2E6F5E'}
@@ -466,6 +473,11 @@ function renderDashChart(){
       }
     }
   });
+}
+
+function renderDashChartSafe(){
+  if(typeof Chart === 'undefined') return;
+  renderDashChart();
 }
 
 // =======================================================================
@@ -1296,7 +1308,7 @@ function motorBillStatementHtml(monthKey, users){
 function gasBillStatementHtml(monthKey, users){
   const rows = users.map(u => {
     const c = computeUserMonth(u.id, monthKey);
-    const gasBikashCharge = (u.id === 'mamoni' || u.id === 'boumoni') ? 0 : c.bkash;
+    const gasBikashCharge = gasBkashChargeForUser(u.id, c.bkash);
     const gasOnlyTotal = c.gas + gasBikashCharge;
     const gasOnlyPaid = gasOnlyTotal;
     const gasOnlyBalance = gasOnlyPaid - gasOnlyTotal;
@@ -1312,7 +1324,7 @@ function gasBillStatementHtml(monthKey, users){
 
   const totals = users.reduce((sum, u) => {
     const c = computeUserMonth(u.id, monthKey);
-    const gasBikashCharge = (u.id === 'mamoni' || u.id === 'boumoni') ? 0 : c.bkash;
+    const gasBikashCharge = gasBkashChargeForUser(u.id, c.bkash);
     const gasOnlyTotal = c.gas + gasBikashCharge;
     const gasOnlyPaid = gasOnlyTotal;
     const gasOnlyBalance = gasOnlyPaid - gasOnlyTotal;
@@ -1377,7 +1389,7 @@ function gasInvoiceHtml(userId, monthKey){
   const currentRow = document.querySelector(`#entryTable tbody tr[data-user="${userId}"]`);
   const paidDate = (currentRow?.querySelector('.f-paiddate')?.value || savedEntry.paidDate || c.paidDate || '—');
   const gasTxnId = (currentRow?.querySelector('.f-gas-txn')?.value || savedEntry.gasTxnId || c.gasTxnId || '—');
-  const gasBikashCharge = (userId === 'mamoni' || userId === 'boumoni') ? 0 : c.bkash;
+  const gasBikashCharge = gasBkashChargeForUser(userId, c.bkash);
   const gasOnlyTotal = c.gas + gasBikashCharge;
   const gasOnlyPaid = gasOnlyTotal;
   const gasOnlyBalance = gasOnlyPaid - gasOnlyTotal;
