@@ -1298,7 +1298,7 @@ function motorBillStatementHtml(monthKey, users){
     </table>
     <div class="inv-payment">
       <div><b>Date of Payment:</b> ${motorUsers[0] ? (STORE.records[monthKey]?.entries?.[motorUsers[0].id]?.paidDate || '—') : '—'}</div>
-      <div><b>Bkash Transaction ID:</b> ${motorUsers[0] ? (STORE.records[monthKey]?.entries?.[motorUsers[0].id]?.gasTxnId || STORE.records[monthKey]?.entries?.[motorUsers[0].id]?.txnId || '—') : '—'}</div>
+      <div><b>Bkash Transaction ID:</b> ${motorUsers[0] ? (STORE.records[monthKey]?.entries?.[motorUsers[0].id]?.motorTxnId || '—') : '—'}</div>
       <div><b>Status:</b> Paid</div>
     </div>
     <div class="inv-note">Note: This is a software-generated invoice. It has been prepared and approved by ${getPreparedByText()}. No physical signature is required.</div>
